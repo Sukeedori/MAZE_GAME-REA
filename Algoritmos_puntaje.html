@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego de Diseño de Algoritmos - Múltiples Niveles</title>
+  <!-- Bootstrap CSS -->
+  <link 
+    rel="stylesheet" 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  >
+  <style>
+    #board {
+      border: 2px solid #333;
+      display: grid;
+      position: relative;
+      margin: 0 auto;
+    }
+    .cell {
+      border: 1px solid #ccc;
+    }
+    #robot {
+      background-color: blue;
+      position: absolute;
+      transition: all 0.3s;
+    }
+    #goal {
+      background-color: green;
+      position: absolute;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+      text-align: center;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="bg-light">
+<div class="container mt-4">
+  <h1 class="text-center mb-4">Juego de Diseño de Algoritmos</h1>
+  <p>
+    Selecciona el nivel de dificultad. Mueve el robot (azul) hasta la meta (verde) 
+    sin salir del tablero. Cada error reduce tu puntaje. ¡Obtén la máxima puntuación de 10!
+  </p>
+
+  <!-- Selección de nivel -->
+  <div class="mb-3">
+    <label for="difficultySelect" class="form-label">Nivel de Dificultad:</label>
+    <select id="difficultySelect" class="form-select w-25">
+      <option value="0">Nivel 1</option>
+      <option value="1">Nivel 2</option>
+      <option value="2">Nivel 3</option>
+      <option value="3">Nivel 4</option>
+      <option value="4">Nivel 5</option>
+    </select>
+  </div>
+
+  <!-- Tablero -->
+  <div id="board"></div>
+
+  <div class="text-center mt-3">
+    <button class="btn btn-secondary m-1" id="btnUp">Arriba</button>
+    <button class="btn btn-secondary m-1" id="btnLeft">Izquierda</button>
+    <button class="btn btn-secondary m-1" id="btnRight">Derecha</button>
+    <button class="btn btn-secondary m-1" id="btnDown">Abajo</button>
+  </div>
+
+  <p id="message" class="mt-3 text-center"></p>
+  <div class="text-center">
+    <button id="resetBtn" class="btn btn-secondary">Reiniciar</button>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script 
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+></script>
+
+<!-- Lógica del juego -->
+<script>
+  const board = document.getElementById('board');
+  const message = document.getElementById('message');
+  const difficultySelect = document.getElementById('difficultySelect');
+  const resetBtn = document.getElementById('resetBtn');
+
+  // Botones de movimiento
+  const btnUp = document.getElementById('btnUp');
+  const btnDown = document.getElementById('btnDown');
+  const btnLeft = document.getElementById('btnLeft');
+  const btnRight = document.getElementById('btnRight');
+
+  // Configuración de cada nivel:
+  //  - rows, cols: dimensiones del tablero
+  //  - robotRow, robotCol: posición inicial del robot
+  //  - goalRow, goalCol: posición de la meta
+  //  - cellSize: tamaño de cada celda en px
+  const levels = [
+    { rows: 5, cols: 5, robotRow: 4, robotCol: 0, goalRow: 0, goalCol: 4, cellSize: 50 },
+    { rows: 5, cols: 5, robotRow: 2, robotCol: 2, goalRow: 0, goalCol: 0, cellSize: 50 },
+    { rows: 6, cols: 6, robotRow: 5, robotCol: 5, goalRow: 0, goalCol: 0, cellSize: 40 },
+    { rows: 6, cols: 6, robotRow: 0, robotCol: 0, goalRow: 5, goalCol: 5, cellSize: 40 },
+    { rows: 7, cols: 7, robotRow: 6, robotCol: 0, goalRow: 0, goalCol: 6, cellSize: 40 },
+  ];
+
+  let currentLevel = 0;
+  let score = 10; // Se inicia con 10
+  let robot, goal;
+  let robotRow, robotCol, goalRow, goalCol, rows, cols, cellSize;
+
+  // Cargar el nivel 0 por defecto
+  loadLevel(0);
+
+  // Evento para cambiar nivel
+  difficultySelect.addEventListener('change', (e) => {
+    loadLevel(parseInt(e.target.value));
+  });
+
+  // Función para cargar un nivel
+  function loadLevel(lvl) {
+    currentLevel = lvl;
+    score = 10;
+    message.textContent = '';
+    message.className = '';
+
+    const levelData = levels[lvl];
+    rows = levelData.rows;
+    cols = levelData.cols;
+    robotRow = levelData.robotRow;
+    robotCol = levelData.robotCol;
+    goalRow = levelData.goalRow;
+    goalCol = levelData.goalCol;
+    cellSize = levelData.cellSize;
+
+    // Configurar el tablero
+    board.innerHTML = '';
+    board.style.width = (cols * cellSize) + 'px';
+    board.style.height = (rows * cellSize) + 'px';
+    board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    board.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+    // Crear celdas (solo para la vista)
+    for (let i = 0; i < rows * cols; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.style.width = cellSize + 'px';
+      cell.style.height = cellSize + 'px';
+      board.appendChild(cell);
+    }
+
+    // Crear robot y meta
+    robot = document.createElement('div');
+    robot.id = 'robot';
+    robot.style.width = cellSize + 'px';
+    robot.style.height = cellSize + 'px';
+    board.appendChild(robot);
+
+    goal = document.createElement('div');
+    goal.id = 'goal';
+    goal.style.width = cellSize + 'px';
+    goal.style.height = cellSize + 'px';
+    board.appendChild(goal);
+
+    updatePositions();
+  }
+
+  // Actualizar posiciones en el tablero
+  function updatePositions() {
+    robot.style.top = (robotRow * cellSize) + 'px';
+    robot.style.left = (robotCol * cellSize) + 'px';
+    goal.style.top = (goalRow * cellSize) + 'px';
+    goal.style.left = (goalCol * cellSize) + 'px';
+    checkWin();
+  }
+
+  // Revisar si el robot llegó a la meta
+  function checkWin() {
+    if (robotRow === goalRow && robotCol === goalCol) {
+      message.textContent = `¡Felicidades! Has llegado a la meta. Puntaje: ${score}/10.`;
+      message.className = 'success';
+    }
+  }
+
+  // Mostrar error y penalizar
+  function showError(msg) {
+    message.textContent = msg + ` | Puntaje actual: ${score}/10.`;
+    message.className = 'error';
+  }
+
+  // Movimientos
+  function moveUp() {
+    if (robotRow > 0) {
+      robotRow--;
+      updatePositions();
+    } else {
+      penalize();
+    }
+  }
+  function moveDown() {
+    if (robotRow < rows - 1) {
+      robotRow++;
+      updatePositions();
+    } else {
+      penalize();
+    }
+  }
+  function moveLeft() {
+    if (robotCol > 0) {
+      robotCol--;
+      updatePositions();
+    } else {
+      penalize();
+    }
+  }
+  function moveRight() {
+    if (robotCol < cols - 1) {
+      robotCol++;
+      updatePositions();
+    } else {
+      penalize();
+    }
+  }
+
+  // Penalizar al salirse del tablero
+  function penalize() {
+    score = Math.max(score - 2, 0);
+    showError('¡Te has salido del tablero!');
+  }
+
+  // Botones de movimiento
+  btnUp.addEventListener('click', moveUp);
+  btnDown.addEventListener('click', moveDown);
+  btnLeft.addEventListener('click', moveLeft);
+  btnRight.addEventListener('click', moveRight);
+
+  // Botón Reiniciar
+  resetBtn.addEventListener('click', () => {
+    loadLevel(currentLevel);
+  });
+</script>
+</body>
+</html>

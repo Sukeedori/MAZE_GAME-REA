@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Juego de laberinto desarrollado con HTML, CSS y JavaScript.">
+    <link rel="icon" type="image/png" href="img/logoipsum-226.svg">
+    <title>Maze Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+    <!--Font--> 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">    
+    <link rel="stylesheet" href="style.css" />
+    <!--JAVASCRPT-->
+    <script src="script.js"></script>
+  </head>
+  <body>
+
+    <div class="tablero">
+      <div class="estadisticas">
+        <div id="contador"></div>
+        <div id="time"></div>
+      </div>
+      <div class="contenedor"></div>
+      <button id="stop" class="hide">Salir <i class="fas fa-angle-double-right"></i></button>
+    </div>
+
+    <div class="info-box">
+        <div class="info-title">
+            <img src="img/maze_icon.png" alt="maze" style="width: 50px; padding-right: 10px;">
+            <span>Instrucciones generales:</span>
+        </div>
+
+        <div class="info-list">
+            <div class="info">1. El objetivo principal es <span style="color: #4e8d9c;">navegar por el laberinto y encontrar la salida</span>. Deberás moverte a través de los caminos, evitando callejones sin salida, hasta llegar al punto final.</div>
+            <div class="info">2. Puedes marcar record al realizar el laberinto con la <span style="color: #653d81;">menor cantidad de movimientos</span> y en el <span style="color: #653d81;">menor tiempo posible.</span></div>
+            <div class="info">3. Recuerda que lo más importante es disfrutar del juego</span></div>
+            <div class="info">Selecciona la <span style="color: #ff212b;">dificultad</span> en la que deseas jugar, cada nivel aumentará la complejidad del laberinto, <span style="color: #8f3626;">¡así que elige según tu habilidad y confianza!</span></div>
+        </div>
+
+        <div class="controlesejemplo">
+            <button class="end">Anterior<i class="fas fa-angle-double-right"></i></button>
+            <button class="start">Iniciar Juego <i class="fas fa-angle-double-right"></i></button>
+            <button class="siguiente">Siguiente Actividad <i class="fas fa-angle-double-right"></i></button>
+        </div>
+    </div>
+
+    <!--MODAL-->
+
+  <div class="controles">
+    <div class="content">
+        <img src="img/confeti.gif" alt="gif">
+        <h4>!Felicitaciones!</h4>
+        <p id="resultado"></p>
+        <div class="btns">
+            <button class="reiniciar">Jugar de nuevo <i class="fas fa-angle-double-right"></i></button>
+            <button class="following">siguiente actividad <i class="fas fa-angle-double-right"></i></button>
+        </div>
+    </div>
+</div>
+  </body>
+</html>
